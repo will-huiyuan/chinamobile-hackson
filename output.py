@@ -14,6 +14,7 @@ class Output:
         else:
             # print(content)
             self.file.write(f"{content[0]},{content[1].strftime('%Y-%m-%d %H:%M')},{content[2]}\n")
+
     #
     # def unusual_save(self,e):
     #     print("code exit with error: " + str(e))

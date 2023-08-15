@@ -1,6 +1,7 @@
-from datetime import datetime
 import re
-import pandas as pd
+from datetime import datetime
+
+
 def convert_time(time_str):
     day_month, year, time_str, am_pm = time_str.split()
     year = int(f"20{year[1:]}")
@@ -19,6 +20,8 @@ def convert_time(time_str):
     # 创建datetime对象
     dt = datetime(year, month, day, hour, minute)
     return dt
+
+
 def sort_by_time(acc):
     time = acc["操作时间"].values
     # convert time
@@ -31,6 +34,7 @@ def sort_by_time(acc):
     result = acc.sort_values("操作时间")
     return result
 
+
 def clean_access(access):
     chinese_part = re.search('[\u4e00-\u9fa5]+', str(access))
     # print(access)
@@ -40,7 +44,10 @@ def clean_access(access):
     # print(cleaned_type)
     return cleaned_type
 
+
 """develop intended functions"""
+
+
 def get_fcsv_path():
     import os
     current_directory = os.getcwd()
