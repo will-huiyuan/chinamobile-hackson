@@ -9,7 +9,7 @@ def high_freq_op_and_work_overtime(operations, output_file, limit_frequency=5):
     """{sorted_account}在1min内，访问一个业务次数超过{limit_frequency}次"""
     high_freq = False
     def not_in_work_time(timestamp):
-        return not (work_start_time <= timestamp.time() <= work_end_time)
+        return not (work_start_time <= timestamp.time() < work_end_time)
     for operation in operations:
         if len(operation[1]) > limit_frequency and not high_freq:
             output_file.append([operation[1].iloc[0, 2], operation[1].iloc[0, 0], "业务高频访问"])
@@ -36,12 +36,13 @@ def repeated_account_use(time_group, output_file, duration=2, limit_ips=3):
         if (now_time.minute % 2 == 0 and not error_flag):
             for i in range(1, duration):
                 try:
-                    if (time_group[now_index + i][0] - now_time).seconds / 60 <= duration - 1:
+                    deltatime = (time_group[now_index + i][0] - now_time)
+                    if (deltatime.days == 0 and  deltatime.seconds/ 60 == duration - 1):
                         check_df = pd.concat([check_df, time_group[now_index + i][1]], ignore_index=True)
                         # print("concat," + str(i))
                         now_index += 1
                         if check_df["源IP"].nunique() >= limit_ips:
-                            output_file.append([check_df.iloc[i, 2], time_group[now_index][0], "账号复用"])
+                            output_file.append([check_df.iloc[i, 2], time_group[now_index][0], "账号复用", check_df])
                     else:
                         # break
                         pass
