@@ -2,6 +2,7 @@ import sys
 import database
 import os
 from algorithm import singly_linked_list
+import preprocess
 
 #for testing:-----
 from datetime import datetime
@@ -17,7 +18,7 @@ def main(to_pred_path,result_save_path):
     test1.sort_time()
     test1.print_entries()
 
-main(1,2)
+main(0,0)
 
 '''if __name__ == "__main__":
     to_pred_path  = sys.argv[1] # 数据路径
