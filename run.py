@@ -15,6 +15,8 @@ def main(file_path,result_save_path):
         unusual_check.unusual_ip(action,output)
         unusual_check.unusual_login(action,output)
         unusual_check.not_in_worktime(action,output)
+        unusual_check.account_repeat(action,output)
+        unusual_check.high_frequency_visit(action,output)
     out.save()
 
 

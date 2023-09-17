@@ -1,7 +1,9 @@
 import database
 import output
-from datetime import datetime
-def unusual_ip(database:database, output):
+from datetime import datetime, timedelta
+
+
+def unusual_ip(database: database, output):
     if len(database.operations) >= 100:
         uncommon_ips = {}
         usual_ip = set()
@@ -21,23 +23,48 @@ def unusual_ip(database:database, output):
 
         for key in uncommon_ips:
             for log in uncommon_ips[key][1]:
-                output.append([database.account,log[0],"非常用IP访问"])
+                output.append([database.account, log[0], "非常用IP访问"])
+        database.uncommon_ips = uncommon_ips
 
 
-def not_in_worktime(database:database,output:output):
-        start_work_time = 8
-        end_work_time = 19
-        operations = database.operations
-        # 遍历数据库中的所有登录条目
-        for t_index in database.time_index:
-            # 解析时间
-            now_time = operations[t_index][0].hour
-            if (now_time < start_work_time) or (now_time > end_work_time):
-                output.append([database.account, operations[t_index][0], "非工作时间访问"])
+def not_in_worktime(database: database, output: output):
+    start_work_time = 8
+    end_work_time = 19
+    operations = database.operations
+    # 遍历数据库中的所有登录条目
+    time_index = database.time_index
+    for t in range(len(time_index)):
+        operation_index = time_index[t]
+        # 解析时间
+        now_time = operations["time"][operation_index].hour
+        if (now_time < start_work_time) or (now_time > end_work_time):
+            for i in range(operation_index, time_index[t + 1]):
+                if operations["action"][i] == "用户登陆":
+                    output.append([database.account, operations["time"][i], "非工作时间访问"])
 
 
-def unusual_login(database:database,output):
-    pass
+def unusual_login(database: database, output):
+    timeindex = database.time_index
+    operations = database.operations
+    for i in range(len(timeindex)):
+        # 一分钟内访问次数 >= 8
+        this_time_i = timeindex[i]
+        try:
+            next_time_i = timeindex[i + 1]
+        except:
+            next_time_i = len(database.operations)
+        if next_time_i - this_time_i >= 8:
+            for action_index in range(this_time_i, next_time_i):
+                output.append([database.account, operations["time"][action_index], "登录异常"])
+        # 一分钟有两个ip访问
+        else:
+            ip_set = set()
+            for action_index in range(this_time_i, next_time_i):
+                ip_set.add(operations["action"][action_index])
+                if len(ip_set) > 1:
+                    for action_i in range(this_time_i, next_time_i):
+                        output.append([database.account, operations["time"][action_i], "登录异常"])
+                    break
 
 
 def account_repeat(database_list, output):
