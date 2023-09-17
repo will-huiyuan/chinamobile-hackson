@@ -29,11 +29,14 @@ def not_in_worktime(database:database,output:output):
         end_work_time = 19
         operations = database.operations
         # 遍历数据库中的所有登录条目
-        for t_index in database.time_index:
+        time_index = database.time_index
+        for t in range(len(time_index)):
+            operation_index = time_index[t]
             # 解析时间
-            now_time = operations[t_index][0].hour
+            now_time = operations[operation_index][0].hour
             if (now_time < start_work_time) or (now_time > end_work_time):
-                output.append([database.account, operations[t_index][0], "非工作时间访问"])
+                for i in range(operation_index,time_index[t+1]):
+                    output.append([database.account, operations[i][0], "非工作时间访问"])
 
 
 def unusual_login(database:database,output):
