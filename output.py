@@ -2,11 +2,16 @@
 class Output:
     def __init__(self, path):
         self.path = path
+<<<<<<< HEAD
         self.output=""
+=======
+        self.file = open(path, 'w', encoding='utf-8')
+        self.board=""
+>>>>>>> 05a8ceced23b946d5f3fd3a39ab05904edbf791d
 
 
     def append(self, content: list):
-        self.output+=f"{content[0]},{content[1].strftime('%Y-%m-%d %H:%M')},{content[2]}\n"
+        self.board+=f"{content[0]},{content[1].strftime('%Y-%m-%d %H:%M')},{content[2]}\n"
 
     def close(self):
         self.file = open(self.path, 'w', encoding='utf-8')

@@ -1,4 +1,8 @@
 /out.csv
+<<<<<<< HEAD
 
 __pycache__/
 
+=======
+*/__pycashe__
+>>>>>>> 05a8ceced23b946d5f3fd3a39ab05904edbf791d

@@ -12,6 +12,7 @@ class Database:
     for o in range(len(self.operations)):
       if self.operations[o][0]!=curr:
         self.time_index.append(o)
+        curr = self.operations[o][0]
 
   def add_entry(self, time, action, ip):
     self.operations["time"].append(time)
