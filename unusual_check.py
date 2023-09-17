@@ -73,22 +73,21 @@ def account_repeat(database_list, output):
         time_list = []
 
         i = 0
-        while i < len(database.time_index) - 1:
+        while i < len(database.time_index)-1:
             ip_sublist = []
             # if minute is even
             if database.operations[database.time_index[i]][0].minute % 2 == 0:
                 time_list.append(database.operations[database.time_index[i]][0])
-                for j in range(database.time_index[i], database.time_index[i + 1]):
+                for j in range(database.time_index[i], database.time_index[i+1]):
                     ip_sublist.append(database.operations[j][2])
 
                 # check next minute within 2
-                if (database.operations[database.time_index[i + 1]][0] - database.operations[database.time_index[i]][
-                    0]) < timedelta(minutes=2):
-                    if i == len(database.time_index) - 2:
-                        for k in range(database.time_index[i + 1], len(database.operations)):
+                if (database.operations[database.time_index[i+1]][0] - database.operations[database.time_index[i]][0]) < timedelta(minutes=2):
+                    if i == len(database.time_index)-2:
+                        for k in range(database.time_index[i+1], len(database.operations)):
                             ip_sublist.append(database.operations[k][2])
                     else:
-                        for k in range(database.time_index[i + 1], database.time_index[i + 2]):
+                        for k in range(database.time_index[i+1], database.time_index[i+2]):
                             ip_sublist.append(database.operations[k][2])
 
                     i += 1
@@ -96,7 +95,7 @@ def account_repeat(database_list, output):
             # if minute is odd
             else:
                 time_list.append(database.operations[database.time_index[i]][0])
-                for j in range(database.time_index[i], database.time_index[i + 1]):
+                for j in range(database.time_index[i], database.time_index[i+1]):
                     ip_sublist.append(database.operations[j][2])
                 i += 1
 
@@ -124,11 +123,11 @@ def high_frequency_visit(database_list, output):
         time_list = []
 
         i = 0
-        while i < len(database.time_index) - 1:
+        while i < len(database.time_index)-1:
             business_sublist = []
 
             time_list.append(database.operations[database.time_index[i]][0])
-            for j in range(database.time_index[i], database.time_index[i + 1]):
+            for j in range(database.time_index[i], database.time_index[i+1]):
                 business_sublist.append(database.operations[j][1])
 
             business_list.append(business_sublist)
