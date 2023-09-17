@@ -67,7 +67,7 @@ def unusual_login(database: database, output):
                     break
 
 
-def account_repeat(database_list, output):
+def account_repeat(database, output):
     ip_list = []
     time_list = []
 
@@ -116,7 +116,7 @@ def account_repeat(database_list, output):
             output.append([database.account, time_list[i], "账号复用"])
 
 
-def high_frequency_visit(database_list, output):
+def high_frequency_visit(database, output):
     business_list = []
     time_list = []
 
