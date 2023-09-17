@@ -40,7 +40,6 @@ def unusual_login(database:database,output):
     pass
 
 
-
 def account_repeat(database_list, output):
     for database in database_list:
         ip_list = []
@@ -124,5 +123,3 @@ def high_frequency_visit(database_list, output):
             for num in count_record:
                 if num >= 5:
                     output.append([database.account, time_list[m], "业务高频访问"])
-
-
