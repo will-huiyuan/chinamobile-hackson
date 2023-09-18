@@ -12,7 +12,7 @@ def unusual_ip(database: database, output):
             ip = log_entry[2]  # IP地址在元组中的第三个位置
             if (ip not in usual_ip):
                 if (ip in uncommon_ips):
-                    if uncommon_ips[ip][0] < 5:
+                    if uncommon_ips[ip][0] < 4:
                         uncommon_ips[ip][0] += 1
                         uncommon_ips[ip][1].append(log_entry)
                     else:
@@ -37,7 +37,7 @@ def not_in_worktime(database: database, output: output):
         operation_index = time_index[t]
         # 解析时间
         now_time = operations[operation_index][0].hour
-        if (now_time < start_work_time) or (now_time > end_work_time):
+        if (now_time < start_work_time) or (now_time >= end_work_time):
             try:
                 for i in range(operation_index, time_index[t + 1]):
                     if operations[i][1] == "用户登陆":
