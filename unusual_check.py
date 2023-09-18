@@ -36,12 +36,16 @@ def not_in_worktime(database: database, output: output):
     for t in range(len(time_index)):
         operation_index = time_index[t]
         # 解析时间
-        now_time = operations["time"][operation_index].hour
+        now_time = operations[operation_index][0].hour
         if (now_time < start_work_time) or (now_time > end_work_time):
-            for i in range(operation_index, time_index[t + 1]):
-                if operations["action"][i] == "用户登陆":
-                    output.append([database.account, operations["time"][i], "非工作时间访问"])
-
+            try:
+                for i in range(operation_index, time_index[t + 1]):
+                    if operations[i][1] == "用户登陆":
+                        output.append([database.account, operations[i][0], "非工作时间访问"])
+            except IndexError:
+                for i in range(operation_index, len(operations)):
+                    if operations[i][1] == "用户登陆":
+                        output.append([database.account, operations[i][0], "非工作时间访问"])
 
 def unusual_login(database: database, output):
     timeindex = database.time_index
@@ -55,15 +59,15 @@ def unusual_login(database: database, output):
             next_time_i = len(database.operations)
         if next_time_i - this_time_i >= 8:
             for action_index in range(this_time_i, next_time_i):
-                output.append([database.account, operations["time"][action_index], "登录异常"])
+                output.append([database.account, operations[action_index][0], "登录异常"])
         # 一分钟有两个ip访问
         else:
             ip_set = set()
             for action_index in range(this_time_i, next_time_i):
-                ip_set.add(operations["action"][action_index])
+                ip_set.add(operations[action_index][2])
                 if len(ip_set) > 1:
                     for action_i in range(this_time_i, next_time_i):
-                        output.append([database.account, operations["time"][action_i], "登录异常"])
+                        output.append([database.account, operations[action_i][0], "登录异常"])
                     break
 
 
@@ -148,3 +152,4 @@ def high_frequency_visit(database, output):
         for num in count_record:
             if num >= 5:
                 output.append([database.account, time_list[m], "业务高频访问"])
+                break
