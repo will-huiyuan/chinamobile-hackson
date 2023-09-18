@@ -13,7 +13,7 @@ def main(file_path):
         next(csv_reader)
 
         for row in csv_reader:
-            category=row[2]
+            category=row[2].strip()
             grouped_data[category].append(row)
 
     data_list = singly_linked_list.LinkedList()

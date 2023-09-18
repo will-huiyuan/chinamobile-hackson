@@ -12,7 +12,7 @@ def unusual_ip(database: database, output):
             ip = log_entry[2]  # IP地址在元组中的第三个位置
             if (ip not in usual_ip):
                 if (ip in uncommon_ips):
-                    if uncommon_ips[ip][0] < 5:
+                    if uncommon_ips[ip][0] < 4:
                         uncommon_ips[ip][0] += 1
                         uncommon_ips[ip][1].append(log_entry)
                     else:
@@ -36,12 +36,16 @@ def not_in_worktime(database: database, output: output):
     for t in range(len(time_index)):
         operation_index = time_index[t]
         # 解析时间
-        now_time = operations["time"][operation_index].hour
-        if (now_time < start_work_time) or (now_time > end_work_time):
-            for i in range(operation_index, time_index[t + 1]):
-                if operations["action"][i] == "用户登陆":
-                    output.append([database.account, operations["time"][i], "非工作时间访问"])
-
+        now_time = operations[operation_index][0].hour
+        if (now_time < start_work_time) or (now_time >= end_work_time):
+            try:
+                for i in range(operation_index, time_index[t + 1]):
+                    if operations[i][1] == "用户登陆" or operations[i][1] == "用户登陆":
+                        output.append([database.account, operations[i][0], "非工作时间访问"])
+            except IndexError:
+                for i in range(operation_index, len(operations)):
+                    if operations[i][1] == "用户登陆" or operations[i][1] == "用户登陆":
+                        output.append([database.account, operations[i][0], "非工作时间访问"])
 
 def unusual_login(database: database, output):
     timeindex = database.time_index
@@ -55,98 +59,97 @@ def unusual_login(database: database, output):
             next_time_i = len(database.operations)
         if next_time_i - this_time_i >= 8:
             for action_index in range(this_time_i, next_time_i):
-                output.append([database.account, operations["time"][action_index], "登录异常"])
+                output.append([database.account, operations[action_index][0], "登录异常"])
         # 一分钟有两个ip访问
         else:
             ip_set = set()
             for action_index in range(this_time_i, next_time_i):
-                ip_set.add(operations["action"][action_index])
+                ip_set.add(operations[action_index][2])
                 if len(ip_set) > 1:
                     for action_i in range(this_time_i, next_time_i):
-                        output.append([database.account, operations["time"][action_i], "登录异常"])
+                        output.append([database.account, operations[action_i][0], "登录异常"])
                     break
 
 
-def account_repeat(database_list, output):
-    for database in database_list:
-        ip_list = []
-        time_list = []
+def account_repeat(database, output):
+    ip_list = []
+    time_list = []
 
-        i = 0
-        while i < len(database.time_index)-1:
-            ip_sublist = []
-            # if minute is even
-            if database.operations[database.time_index[i]][0].minute % 2 == 0:
-                time_list.append(database.operations[database.time_index[i]][0])
-                for j in range(database.time_index[i], database.time_index[i+1]):
-                    ip_sublist.append(database.operations[j][2])
-
-                # check next minute within 2
-                if (database.operations[database.time_index[i+1]][0] - database.operations[database.time_index[i]][0]) < timedelta(minutes=2):
-                    if i == len(database.time_index)-2:
-                        for k in range(database.time_index[i+1], len(database.operations)):
-                            ip_sublist.append(database.operations[k][2])
-                    else:
-                        for k in range(database.time_index[i+1], database.time_index[i+2]):
-                            ip_sublist.append(database.operations[k][2])
-
-                    i += 1
-                i += 1
-            # if minute is odd
-            else:
-                time_list.append(database.operations[database.time_index[i]][0])
-                for j in range(database.time_index[i], database.time_index[i+1]):
-                    ip_sublist.append(database.operations[j][2])
-                i += 1
-
-            ip_list.append(ip_sublist)
-
-        if i < len(database.time_index):
-            ip_sublist = []
-            for j in range(database.time_index[i], len(database.operations)):
-                ip_sublist.append(database.operations[j][2])
-            ip_list.append(ip_sublist)
-            time_list.append(database.operations[database.time_index[i]][0])
-
-        for i in range(len(ip_list)):
-            ip_record = []
-            for ip in ip_list[i]:
-                if ip not in ip_record:
-                    ip_record.append(ip)
-            if len(ip_record) >= 3:
-                output.append([database.account, time_list[i], "账号复用"])
-
-
-def high_frequency_visit(database_list, output):
-    for database in database_list:
-        business_list = []
-        time_list = []
-
-        i = 0
-        while i < len(database.time_index)-1:
-            business_sublist = []
-
+    i = 0
+    while i < len(database.time_index)-1:
+        ip_sublist = []
+        # if minute is even
+        if database.operations[database.time_index[i]][0].minute % 2 == 0:
             time_list.append(database.operations[database.time_index[i]][0])
             for j in range(database.time_index[i], database.time_index[i+1]):
-                business_sublist.append(database.operations[j][1])
+                ip_sublist.append(database.operations[j][2])
 
-            business_list.append(business_sublist)
+            # check next minute within 2
+            if (database.operations[database.time_index[i+1]][0] - database.operations[database.time_index[i]][0]) < timedelta(minutes=2):
+                if i == len(database.time_index)-2:
+                    for k in range(database.time_index[i+1], len(database.operations)):
+                        ip_sublist.append(database.operations[k][2])
+                else:
+                    for k in range(database.time_index[i+1], database.time_index[i+2]):
+                        ip_sublist.append(database.operations[k][2])
+
+                i += 1
+            i += 1
+        # if minute is odd
+        else:
+            time_list.append(database.operations[database.time_index[i]][0])
+            for j in range(database.time_index[i], database.time_index[i+1]):
+                ip_sublist.append(database.operations[j][2])
             i += 1
 
-        business_sublist = []
+        ip_list.append(ip_sublist)
+
+    if i < len(database.time_index):
+        ip_sublist = []
         for j in range(database.time_index[i], len(database.operations)):
-            business_sublist.append(database.operations[j][1])
-        business_list.append(business_sublist)
+            ip_sublist.append(database.operations[j][2])
+        ip_list.append(ip_sublist)
         time_list.append(database.operations[database.time_index[i]][0])
 
-        for m in range(len(business_list)):
-            business_record = []
-            count_record = []
-            for business in business_list[m]:
-                if business not in business_record:
-                    business_record.append(business)
-                    count_record.append(business_list[m].count(business))
+    for i in range(len(ip_list)):
+        ip_record = []
+        for ip in ip_list[i]:
+            if ip not in ip_record:
+                ip_record.append(ip)
+        if len(ip_record) >= 3:
+            output.append([database.account, time_list[i], "账号复用"])
 
-            for num in count_record:
-                if num >= 5:
-                    output.append([database.account, time_list[m], "业务高频访问"])
+
+def high_frequency_visit(database, output):
+    business_list = []
+    time_list = []
+
+    i = 0
+    while i < len(database.time_index)-1:
+        business_sublist = []
+
+        time_list.append(database.operations[database.time_index[i]][0])
+        for j in range(database.time_index[i], database.time_index[i+1]):
+            business_sublist.append(database.operations[j][1])
+
+        business_list.append(business_sublist)
+        i += 1
+
+    business_sublist = []
+    for j in range(database.time_index[i], len(database.operations)):
+        business_sublist.append(database.operations[j][1])
+    business_list.append(business_sublist)
+    time_list.append(database.operations[database.time_index[i]][0])
+
+    for m in range(len(business_list)):
+        business_record = []
+        count_record = []
+        for business in business_list[m]:
+            if business not in business_record:
+                business_record.append(business)
+                count_record.append(business_list[m].count(business))
+
+        for num in count_record:
+            if num >= 5:
+                output.append([database.account, time_list[m], "业务高频访问"])
+                break
