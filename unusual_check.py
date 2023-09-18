@@ -37,14 +37,15 @@ def not_in_worktime(database: database, output: output):
         operation_index = time_index[t]
         # 解析时间
         now_time = operations[operation_index][0].hour
-        if (now_time < start_work_time) or (now_time >= end_work_time):
+
+        if (now_time < start_work_time) or (now_time > end_work_time):
             try:
                 for i in range(operation_index, time_index[t + 1]):
-                    if operations[i][1] == "用户登陆" or operations[i][1] == "用户登陆":
+                    if operations[i][1] == "用户登陆":
                         output.append([database.account, operations[i][0], "非工作时间访问"])
             except IndexError:
                 for i in range(operation_index, len(operations)):
-                    if operations[i][1] == "用户登陆" or operations[i][1] == "用户登陆":
+                    if operations[i][1] == "用户登陆":
                         output.append([database.account, operations[i][0], "非工作时间访问"])
 
 def unusual_login(database: database, output):
