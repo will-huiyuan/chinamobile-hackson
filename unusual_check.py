@@ -78,11 +78,11 @@ def high_frequency_visit(database, output):
     while i < len(database.time_index)-1:
         # 记录单个分钟所有的访问记录
         business_sublist = []
-
+        # 记录当前时间，time_list和business_list中的index一一对应
         time_list.append(database.operations[database.time_index[i]][0])
         for j in range(database.time_index[i], database.time_index[i+1]):
             business_sublist.append(database.operations[j][1])
-
+        # 将该一分钟访问的业务sublist添加到总业务list
         business_list.append(business_sublist)
         i += 1
 
@@ -126,19 +126,21 @@ def account_repeat(database, output):
         for j in range(database.time_index[i], database.time_index[i+1]):
             ip_sublist.append(database.operations[j][2])
 
-        # 检查下一个不同分钟是否与这一分钟是连续的两分钟
+        # 检查下一个不同分钟是否与这一分钟是连续的两分钟，如果是，则添加下一分钟访问的所有所有ip到当前的ip_sublist
         if (database.operations[database.time_index[i+1]][0] - database.operations[database.time_index[i]][0]) <= timedelta(minutes=2):
+            # 防止 index out of bound，单独处理是连续两分钟且第二分钟是最后一个不同分钟的情况
             if i == len(database.time_index)-2:
                 for k in range(database.time_index[i+1], len(database.operations)):
                     ip_sublist.append(database.operations[k][2])
+            # 其余普通情况
             else:
                 for p in range(database.time_index[i+1], database.time_index[i+2]):
                     ip_sublist.append(database.operations[p][2])
         i += 1
-
+        # 将该一分钟/连续两分钟访问的ip sublist添加到总ip list
         ip_list.append(ip_sublist)
 
-    # 防止 index out of bound，单独处理最后一个不同分钟的访问记录
+    # 防止 index out of bound，单独处理最后一个不同分钟不在连续的两分钟内的情况
     if i < len(database.time_index):
         ip_sublist = []
         for j in range(database.time_index[i], len(database.operations)):
@@ -153,7 +155,7 @@ def account_repeat(database, output):
         for ip in ip_list[n]:
             if ip not in ip_record:
                 ip_record.append(ip)
-        # 如果ip达到3个以及上，则输出异常提示
+        # 如果该两分钟内ip个数达到3个以及上，则输出异常提示
         if len(ip_record) >= 3:
             output.append([database.account, time_list[n], "账号复用"])
             
