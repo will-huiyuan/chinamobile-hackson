@@ -4,23 +4,27 @@ from datetime import datetime, timedelta
 
 
 def unusual_ip(database: database, output):
+    # 仅在100次以上记录时才进行后续操作
     if len(database.operations) >= 100:
         uncommon_ips = {}
         usual_ip = set()
-        # 遍历列表并更新字典中的计数
+        # 遍历数据，找出非常用ip
         for log_entry in database.operations:
             ip = log_entry[2]  # IP地址在元组中的第三个位置
             if (ip not in usual_ip):
+                # 累计记录出现次数
                 if (ip in uncommon_ips):
                     if uncommon_ips[ip][0] < 4:
                         uncommon_ips[ip][0] += 1
                         uncommon_ips[ip][1].append(log_entry)
+                    # 若出现了超过4次，即为合理ip，移除记录
                     else:
                         del uncommon_ips[ip]
                         usual_ip.add(ip)
+                # ip第一次出现，添加记录
                 else:
                     uncommon_ips[ip] = [1, [log_entry]]
-
+        # 输出结果
         for key in uncommon_ips:
             for log in uncommon_ips[key][1]:
                 output.append([database.account, log[0], "非常用IP访问"])
@@ -28,12 +32,14 @@ def unusual_ip(database: database, output):
 
 
 def not_in_worktime(database: database, output: output):
+    # 定义工作时间
     start_work_time = 8
     end_work_time = 19
     operations = database.operations
     # 遍历数据库中的所有登录条目
     time_index = database.time_index
     for t in range(len(time_index)):
+        # 通过time index来获取不同的时间所在的index
         operation_index = time_index[t]
         # 解析时间
         now_time = operations[operation_index][0].hour
@@ -42,6 +48,7 @@ def not_in_worktime(database: database, output: output):
                 for i in range(operation_index, time_index[t + 1]):
                     if operations[i][1] == "用户登陆":
                         output.append([database.account, operations[i][0], "非工作时间访问"])
+            # 当遍历到最后一项时会index error，用列表长度作为下一个时间节点
             except IndexError:
                 for i in range(operation_index, len(operations)):
                     if operations[i][1] == "用户登陆":
@@ -50,13 +57,16 @@ def not_in_worktime(database: database, output: output):
 def unusual_login(database: database, output):
     timeindex = database.time_index
     operations = database.operations
+    # 通过time index来获取不同的时间所在的index
     for i in range(len(timeindex)):
         # 一分钟内访问次数 >= 8
         this_time_i = timeindex[i]
         try:
             next_time_i = timeindex[i + 1]
+        # 当遍历到最后一项时会index error，用列表长度作为下一个时间节点
         except:
             next_time_i = len(database.operations)
+        # 访问次数 >= 8
         if next_time_i - this_time_i >= 8:
             for action_index in range(this_time_i, next_time_i):
                 output.append([database.account, operations[action_index][0], "登录异常"])
@@ -64,6 +74,7 @@ def unusual_login(database: database, output):
         else:
             ip_set = set()
             for action_index in range(this_time_i, next_time_i):
+                # set中相同值只存在一次
                 ip_set.add(operations[action_index][2])
                 if len(ip_set) > 1:
                     for action_i in range(this_time_i, next_time_i):

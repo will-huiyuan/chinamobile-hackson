@@ -11,8 +11,10 @@ class Output:
     def save(self):
         # 保存输出到文件
         self.file = open(self.path, 'w', encoding='utf-8')
-        self.file.write("异常账号,异常时间,异常类型\n")  # 写入标题行
-        self.file.write(f"{self.output}\n")  # 写入输出内容
-        print(f"输出文件已保存至 {self.path}")
+
+        self.file.write("异常账号,异常时间,异常类型\n")
+        self.file.write(self.output)
+        print(f"output file saved at {self.path}")
+
         self.file.close()
         
