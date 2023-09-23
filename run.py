@@ -12,11 +12,11 @@ def main(file_path,result_save_path):
     actions = preprocess.main(file_path)
     out = output.Output(result_save_path)
     for action in actions:
-        # unusual_check.unusual_ip(action,out)
-        # unusual_check.unusual_login(action,out)
+        unusual_check.unusual_ip(action,out)
+        unusual_check.unusual_login(action,out)
         unusual_check.not_in_worktime(action,out)
-        # unusual_check.account_repeat(action,out)
-        # unusual_check.high_frequency_visit(action,out)
+        unusual_check.account_repeat(action,out)
+        unusual_check.high_frequency_visit(action,out)
     out.save()
 
 
